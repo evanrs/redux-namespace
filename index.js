@@ -1,6 +1,8 @@
 import React from 'react';
-import ReactRedux from 'react-redux';
+import * as ReactRedux from 'react-redux';
 
-import { createConnect } from './src';
-
+import { createConnect, createShape } from './src';
 export const connect = createConnect(React, ReactRedux);
+export const shape = createShape(React);
+
+export * from './src';

@@ -1,11 +1,5 @@
 export const BIND = 'BIND_NAMESPACE';
 
-export const shape = {
-  namespace: PropTypes.string.isRequired,
-  assign: PropTypes.func.isRequired,
-  select: PropTypes.func.isRequired
-}
-
 export function assign(namespace, key, value) {
   if (! key)
     return (key, value) =>
@@ -21,13 +15,12 @@ export function assign(namespace, key, value) {
 }
 
 export function createConnect(React, ReactRedux) {
-  const { Component } = React;
-  const { connect: connectRedux } = ReactRedux;
+  const { Component, PropTypes } = React;
 
   return function connectNamespace(namespace, initial={}) {
     let _assign = assign(namespace);
     return WrappedComponent =>
-      @connectRedux(state => state[namespace] || initial)
+      @ReactRedux.connect(state => state[namespace] || initial)
       class Connector extends Component {
         render () {
           return <WrappedComponent {...{
@@ -41,8 +34,17 @@ export function createConnect(React, ReactRedux) {
   }
 }
 
-export function reducer (state, { type, payload: { namespace, key, value } }) {
+export function createShape({PropTypes}) {
+  return {
+    namespace: PropTypes.string.isRequired,
+    assign: PropTypes.func.isRequired,
+    select: PropTypes.func.isRequired
+  }
+}
+
+export function reducer (state={}, { type, payload: { namespace, key, value } }) {
   if (action.type === BIND)
     state[namespace][key] = value;
+
   return state;
 }

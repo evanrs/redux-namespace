@@ -1,6 +1,8 @@
 import React from 'react-native';
-import ReactRedux from 'react-redux/native';
+import * as ReactRedux from 'react-redux/native';
 
-import { createConnect } from './src';
-
+import { createConnect, createShape } from './src';
 export const connect = createConnect(React, ReactRedux);
+export const shape = createShape(React);
+
+export * from './src';
