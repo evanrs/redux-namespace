@@ -26,15 +26,17 @@ import namespace from 'redux-namespace';
 @namespace.connect('your/component/namespace')
 class Form extends React.Component {
   static propTypes = {...@namespace.shape}
-  _onSubmit() {
-    this.props.dispatch({type: 'SAVE', payload: this.namespace})
-  }
+
   render () {
-    let {select, assign} = this.props;
+    let {select, assign, dispatch} = this.props;
     return (
-      <form onSumbit={e => this._onSubmit()}/>
-        <input value={select('email') onChange={assign('email')}/>
-        <input value={select('password') onChange={assign('password')}/>
+      <form onSumbit={() => dispatch(submitAction(this.props.namepsace))}/>
+        <input
+          value={select('email')}
+          onChange={e => assign('email', e.target.value)}/>
+        <input
+          value={select('password')}
+          onChange={e => assign('password', e.target.value)}/>
       </form>
     )
   }
