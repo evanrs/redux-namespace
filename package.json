@@ -1,0 +1,31 @@
+{
+  "name": "redux-namespace",
+  "version": "0.0.0",
+  "description": "Namespacing for components state data in redux store.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/evanrs/redux-namespace.git"
+  },
+  "keywords": [
+    "redux",
+    "data",
+    "binding"
+  ],
+  "author": "Evan Schneider",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/evanrs/redux-namespace/issues"
+  },
+  "homepage": "https://github.com/evanrs/redux-namespace#readme",
+  "peerDependencies": {
+    "react": "^0.14.3",
+    "react-native": "^0.15.0"
+  },
+  "dependencies": {
+    "react-redux": "^3.1.0"
+  }
+}
