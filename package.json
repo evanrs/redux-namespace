@@ -1,6 +1,6 @@
 {
   "name": "redux-namespace",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "Namespacing for components state data in redux store.",
   "main": "index.js",
   "scripts": {
