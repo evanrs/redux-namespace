@@ -1,7 +1,7 @@
 {
   "name": "redux-namespace",
-  "version": "0.0.4",
-  "description": "Namespacing for components state data in redux store.",
+  "version": "0.0.5",
+  "description": "Namespace your component state in your Redux store",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -13,7 +13,9 @@
   "keywords": [
     "redux",
     "data",
-    "binding"
+    "binding",
+    "namespace",
+    "forms"
   ],
   "author": "Evan Schneider",
   "license": "ISC",

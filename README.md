@@ -1,7 +1,8 @@
 Redux Namespace
 =============
 
-Move your component local state into your Redux store under.
+Dead simple tool moving component local state to a Redux store namespace.
+
 ```shell
 npm install --save redux-namespace
 ```
@@ -10,8 +11,8 @@ npm install --save redux-namespace
 Transient state like toggles and form input require too much boiler plate.
 
 [`redux-namespace`](https://www.npmjs.com/package/redux-namespace)
-helps you connect your component with a trivial key value store.
-To solve the some the of the basic problems of view state after routing.
+helps you connect your component with a trivial key value store. This solves the
+far–too–painful/should–be–easier problems with managing view state after routing.
 
 ### Why store component state outside the component?
 To get the incredible time traveling super powers provided by complete hydration
