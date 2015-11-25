@@ -108,10 +108,21 @@ export namespace.connect('component/namespace')(Form)
 
 #### Routing
 ```js
-<Route path='free/pizza'
-  component={ namespace.connect('route/namespace')(Component) }/>
+<Route path='free-pizza'
+  component={ namespace.connect('pizza-surplus')(Component) }/>
 ```
 
+##### You get a namespace, and you get a namespace … !
+Automatically wrap your routes by assigning them after they're made.
+```js
+let routes = [
+  <Route/>
+  <Route/>
+  <Route/>
+]
+
+routes = routes.map(route => namespace.connect(route.path)(route))
+```
 
 #### Lazy binding… sort of
 ```js
@@ -169,11 +180,11 @@ function (state, action) {
         break;
     }
 
-    // I'm not sure which is more esoteric, the previous example or this onPress
+    // I'm not sure which is more esoteric, the previous example or this one
     if (state.namespace[namespace][ttl] > new Date() - state[ttl][action.namespace][key])
       delete state.namespace[namespace][key];
   }
-  
+
   return state;
 }
 ```
