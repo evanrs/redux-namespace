@@ -26,6 +26,7 @@
     "react-native": "^0.15.0"
   },
   "dependencies": {
+    "lodash.result": "^3.1.2",
     "react-redux": "^3.1.0"
   }
 }

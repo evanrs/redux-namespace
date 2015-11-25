@@ -1,3 +1,5 @@
+import result from 'lodash.result';
+
 export const BIND = 'BIND_NAMESPACE';
 
 export function assign(namespace, key, value) {
@@ -8,7 +10,7 @@ export function assign(namespace, key, value) {
   let action = (value) => ({
     type: BIND, payload: { namespace, key, value } })
 
-  if (! value)
+  if ([...arguments].length < assign.length)
     return action;
 
   return action(value);
@@ -20,14 +22,14 @@ export function createConnect(React, ReactRedux) {
   return function connectNamespace(namespace, initial={}) {
     let _assign = assign(namespace);
     return WrappedComponent =>
-      @ReactRedux.connect(state => state[namespace] || initial)
-      class Connector extends Component {
+      @ReactRedux.connect(({ namespace: { [namespace]: state } }) =>
+        ({ select: (key, _default) => result(state, key, _default) }))
+      class NamespaceBridge extends Component {
         render () {
           return <WrappedComponent {...{
             ...this.props,
             assign: key => value =>
-              this.props.dispatch(_assign(key, value)),
-            select: key => this.props[key],
+              this.props.dispatch(_assign(key, value))
           }}/>
         }
       }
@@ -42,9 +44,13 @@ export function createShape({PropTypes}) {
   }
 }
 
-export function reducer (state={}, { type, payload: { namespace, key, value } }) {
-  if (action.type === BIND)
-    state[namespace][key] = value;
+export function reducer (state={}, action={}) {
+  if (action.type === BIND) {
+    let { payload: { namespace, key, value } } = action
+    state[namespace] = {
+      ...state[namespace], ...{[key]: value}}
+
+  }
 
   return state;
 }
