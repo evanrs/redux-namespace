@@ -13,19 +13,20 @@ Transient state like toggles and form input require too much boiler plate.
 helps you connect your component with a trivial key value store.
 To solve the some the of the basic problems of view state after routing.
 
-You can use Redux Namespace relies on React Redux for connecting to the store and
-returns two new methods `select` and `assign`. To put a value in the namespace
-you call `assign(key, value)`, to get it back call `select(key)`. And, to get
-all the values in the namespace call `select()` without any parameters.
+### Why store component state outside the component?
+To get the incredible time traveling super powers provided by complete hydration
+in your app state. Time travel is fun, play with [this](http://todo.cmyk.nyc).
 
-To connect your components with their own namespace use `namespace.connect`.
+Redux Namespace builds on [React Redux](https://www.npmjs.com/package/react-redux/),
+but with two new methods: ```select``` and ```assign``` along with `dispatch`.
+Calling `assign(key, value)` puts a value in your namespace and `select(key)` gets
+it out. Calling `select()` with no parameters returns the entire namespace.
+
+Connecting your components with their own namespace is trivial. Use it like
+React Redux, but forget about writing the selectors.
 ```js
 export namespace.connect('route/namespace')(Component)
 ```
-
-#### Why store component state outside the component?
-To get the incredible time traveling super powers provided by complete hydration
-in your app state. Time travel is fun, play with [this](http://todo.cmyk.nyc).
 
 ## Installation
 
@@ -33,15 +34,18 @@ in your app state. Time travel is fun, play with [this](http://todo.cmyk.nyc).
 npm install --save redux-namespace
 ```
 
+#### Attach the Reducer
 ```js
 import { createStore, combineReducers } from 'redux';
 import namespace from 'redux-namespace';
 
-
 const store = createStore(combineReducers({namespace}));
 ```
 
+#### Bind your component
+
 ## Usage
+
 
 #### Native
 ```js
@@ -72,6 +76,7 @@ class Form extends React.Component {
 }
 ```
 
+
 #### Web
 ```js
 import React from 'react'
@@ -91,6 +96,42 @@ class Form extends React.Component {
           value={select('password')}
           onChange={e => assign('password', e.target.value)}/>
       </form>
+    )
+  }
+}
+
+// Or, if decorators aren't your thing
+export namespace.connect('component/namespace')(Form)
+```
+
+#### Lazy binding… sort of
+```js
+import React from 'react'
+import namespace from 'redux-namespace';
+
+@namespace.connect('documents')
+class DocumentEditor extends React.Component {
+  static propTypes = {...@namespace.shape}
+
+  render () {
+    let document = namespace.connect(`documents/${select('currentId')}`);
+    let autosave = namespace.connect(`documents/${id}/autosave`);
+
+    let Loader = document(Await)
+    let Autosave = bridge(autosave(DebouncedSave))
+
+    return (
+      <Loader>
+        <Autosave/>
+        { map(React.createElement,
+            map(document, [
+              Menu,
+              WYSIWYG,
+              Editor,
+              WordCount
+            ]))
+          }
+      </Loader>
     )
   }
 }
