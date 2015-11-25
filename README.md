@@ -136,7 +136,7 @@ class RecipeEditor extends React.Component {
     let groceries = namespace.connect('groceries');
 
     let Loader = document(Await)
-    let Autosave = bridge(autosave(DebouncedSave))
+    let Autosave = document(autosave(DebouncedSave))
 
     return (
       <Loader>
