@@ -2,14 +2,15 @@ Redux Namespace
 =============
 
 Move your component local state into your Redux store under.
-```js
-namespace.connect('component/path')(Component)
+```shell
+npm install --save redux-namespace
 ```
 
 ## Motivation
-Transient state, like toggles and form input, requires too much boiler plate.
+Transient state like toggles and form input require too much boiler plate.
 
-Redux Namespace helps you connect your component with a trivial key value store.
+[`redux-namespace`](https://www.npmjs.com/package/redux-namespace)
+helps you connect your component with a trivial key value store.
 To solve the some the of the basic problems of view state after routing.
 
 You can use Redux Namespace relies on React Redux for connecting to the store and
@@ -97,6 +98,37 @@ class Form extends React.Component {
 // Or, if decorators aren't your thing
 export namespace.connect('component/namespace')(Form)
 ```
+
+
+### Skip writing actions
+Using the `namespace.BIND` constant you can write new reducers to work with
+your events without adding more plumbing.
+
+```js
+function (state, action) {
+  if (action.type === namespace.BIND) {
+    let {namespace, key, value} = action.payload;
+
+    switch (namespace) {
+      case 'app/signup':
+        state[namespace][key].error = validate(key, value.field);
+        break;
+
+      case 'my/easter/egg':
+        if (key === 'menuToggle')
+          if (++state.finalCountdown > 5)
+            state.surpriseCatGif = true
+        break;
+    }
+  }
+  return state;
+}
+```
+
+Although you probably shouldn't do this often, it's faster than scaffolding
+the additional constants and action creators. Beware, with great power comes greater side effects…
+that we probably should avoid unless we liked Angular 1—better known as Whoopsie Daisy.
+
 
 ## License
 
