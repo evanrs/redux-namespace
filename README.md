@@ -54,9 +54,9 @@ import React, {View, Text, TextInput, TouchableHighlight, } from 'react-native'
 import namespace from 'redux-namespace/native';
 
 // If decorators are your thing
-@namespace.connect('component/namespace')
+space.connect('component/namespace')
 class Form extends React.Component {
-  static propTypes = {...@namespace.shape}
+  static propTypes = {...namespace.shape}
 
   render () {
     let {select, assign, dispatch} = this.props;
@@ -84,7 +84,7 @@ import React from 'react'
 import namespace from 'redux-namespace';
 
 class Form extends React.Component {
-  static propTypes = {...@namespace.shape}
+  static propTypes = {...namespace.shape}
 
   render () {
     let {select, assign, dispatch} = this.props;
@@ -128,7 +128,7 @@ routes = routes.map(route => namespace.connect(route.path)(route))
 ```js
 @namespace.connect('recipes')
 class RecipeEditor extends React.Component {
-  static propTypes = {...@namespace.shape}
+  static propTypes = {...namespace.shape}
 
   render () {
     let document = namespace.connect(`recipes/${select('currentId')}`);
