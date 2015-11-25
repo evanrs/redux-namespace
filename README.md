@@ -15,18 +15,19 @@ helps you connect your component with a trivial key value store. This solves the
 far–too–painful/should–be–easier problems with managing view state after routing.
 
 ### Why store component state outside the component?
-To get the incredible time traveling super powers provided by complete hydration
-in your app state. Time travel is fun, play with [this](http://todo.cmyk.nyc).
+To get the incredible time traveling super powers and retained transients provided
+from having complete hydration of your app state. Time travel is fun, play with [this](http://todo.cmyk.nyc).
 
 Redux Namespace builds on [React Redux](https://www.npmjs.com/package/react-redux/),
-but with two new methods: ```select``` and ```assign``` along with `dispatch`.
+but provides two new methods: ```select``` and ```assign``` to go with `dispatch`.
 Calling `assign(key, value)` puts a value in your namespace and `select(key)` gets
 it out. Calling `select()` with no parameters returns the entire namespace.
 
 Connecting your components with their own namespace is trivial. Use it like
 React Redux, but forget about writing the selectors.
+
 ```js
-export namespace.connect('route/namespace')(Component)
+namespace.connect('recipe/editor')(Component)
 ```
 
 ## Installation
@@ -43,7 +44,6 @@ import namespace from 'redux-namespace';
 const store = createStore(combineReducers({namespace}));
 ```
 
-#### Bind your component
 
 ## Usage
 
@@ -105,18 +105,24 @@ class Form extends React.Component {
 export namespace.connect('component/namespace')(Form)
 ```
 
+
+#### Routing
+```js
+<Route path='free/pizza'
+  component={ namespace.connect('route/namespace')(Component) }/>
+```
+
+
 #### Lazy binding… sort of
 ```js
-import React from 'react'
-import namespace from 'redux-namespace';
-
-@namespace.connect('documents')
-class DocumentEditor extends React.Component {
+@namespace.connect('recipes')
+class RecipeEditor extends React.Component {
   static propTypes = {...@namespace.shape}
 
   render () {
-    let document = namespace.connect(`documents/${select('currentId')}`);
-    let autosave = namespace.connect(`documents/${id}/autosave`);
+    let document = namespace.connect(`recipes/${select('currentId')}`);
+    let autosave = namespace.connect(`recipes/${select('currentId')}/autosave`);
+    let groceries = namespace.connect('groceries');
 
     let Loader = document(Await)
     let Autosave = bridge(autosave(DebouncedSave))
@@ -129,16 +135,16 @@ class DocumentEditor extends React.Component {
               Menu,
               WYSIWYG,
               Editor,
-              WordCount
+              WordCount,
+              groceries(VegetableCount),
+              groceries(CalorieCount),
+              groceries(CountChoculaCount)
             ]))
           }
       </Loader>
     )
   }
 }
-
-// Or, if decorators aren't your thing
-export namespace.connect('component/namespace')(Form)
 ```
 
 
@@ -162,7 +168,12 @@ function (state, action) {
             state.surpriseCatGif = true
         break;
     }
+
+    // I'm not sure which is more esoteric, the previous example or this onPress
+    if (state.namespace[namespace][ttl] > new Date() - state[ttl][action.namespace][key])
+      delete state.namespace[namespace][key];
   }
+  
   return state;
 }
 ```
