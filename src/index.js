@@ -23,14 +23,18 @@ export function createConnect(React, ReactRedux) {
     let _assign = assign(namespace);
     return WrappedComponent =>
       @ReactRedux.connect(({ namespace: { [namespace]: state } }) =>
-        ({ select: (key, _default) => result(state, key, _default) }))
+        ({ select: (key, __ = state) => result(state, key, __) }))
       class NamespaceBridge extends Component {
         render () {
-          return <WrappedComponent {...{
+          let props = {
+            // namespace defers to props
+            ...this.props.select(),
             ...this.props,
             assign: key => value =>
               this.props.dispatch(_assign(key, value))
-          }}/>
+          }
+          return React.isValidElement(WrappedComponent) ?
+            React.cloneElement(WrappedComponent, props) : <WrappedComponent {...props}/>
         }
       }
   }
@@ -49,7 +53,6 @@ export function reducer (state={}, action={}) {
     let { payload: { namespace, key, value } } = action
     state[namespace] = {
       ...state[namespace], ...{[key]: value}}
-
   }
 
   return state;
