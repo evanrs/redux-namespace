@@ -33,7 +33,9 @@ export function createConnect(React, ReactRedux) {
             assign: (key, ...args) =>
                       args.length === 0 ?
                         props.assign.bind(this, key)
-                      : props.dispatch(_assign(key, ...args)).payload.value
+                      : props.select(key) !== args[0] ?
+                          props.dispatch(_assign(key, args[0])).payload.value
+                        : args[0]
           }
           return React.isValidElement(WrappedComponent) ?
             React.cloneElement(WrappedComponent, props) : <WrappedComponent {...props}/>
