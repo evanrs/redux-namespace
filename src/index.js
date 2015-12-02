@@ -20,23 +20,45 @@ export function createConnect(React, ReactRedux) {
   const { Component, PropTypes } = React;
 
   return function connectNamespace(namespace, initial={}) {
-    let _assign = assign(namespace);
     return WrappedComponent =>
-      @ReactRedux.connect(({ namespace: { [namespace]: state } }) =>
-        ({ select: (key, __ = state) => result(state, key, __) }))
+      @ReactRedux.connect(({ namespace: { [namespace]: state } }) => ({
+        assign: assign(namespace),
+        select(key, __ = state) {
+          return result(state, key, __);
+        }
+      }))
       class NamespaceBridge extends Component {
         render () {
-          let props = {
-            // namespace defers to props
-            ...this.props.select(),
-            ...this.props,
-            assign: (key, ...args) =>
-                      args.length === 0 ?
-                        props.assign.bind(this, key)
-                      : props.select(key) !== args[0] ?
-                          props.dispatch(_assign(key, args[0])).payload.value
-                        : args[0]
+          let {assign, dispatch, select, ...props} = this.props;
+
+          function dispatcher(target, value) {
+            return (
+              // curry or map target
+              arguments.length === 1 ?
+              // curry target
+                typeof target === 'string' ?
+                  dispatcher.bind(this, target)
+              // map target ({key: value}) => assign
+              : ( Object.keys(target).map(key =>
+                    dispatcher(key, target[key]))
+                , target )
+            // memoize
+            : select(target) !== value ?
+                ( dispatch(assign(target, value))
+                , value )
+            : value
+            )
           }
+
+          props = {
+            // namespace defers to props
+            ...select(),
+            ...props,
+            assign: dispatcher,
+            dispatch,
+            select
+          }
+
           return React.isValidElement(WrappedComponent) ?
             React.cloneElement(WrappedComponent, props) : <WrappedComponent {...props}/>
         }
