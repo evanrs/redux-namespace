@@ -42,6 +42,9 @@ export function createConnect(React, ReactRedux) {
               : ( Object.keys(target).map(key =>
                     dispatcher(key, target[key]))
                 , target )
+            // deferred selector
+            : typeof value === 'function' ?
+              () => dispatcher(target, value())
             // memoize
             : select(target) !== value ?
                 ( dispatch(assign(target, value))
