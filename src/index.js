@@ -23,8 +23,8 @@ export function createConnect(React, ReactRedux) {
     return WrappedComponent =>
       @ReactRedux.connect(({ namespace: { [namespace]: state } }) => ({
         assign: assign(namespace),
-        select(key, __ = state) {
-          return result(state, key, __);
+        select(key, __) {
+          return arguments.length > 0 ? result(state, key, __) : state || {}
         }
       }))
       class NamespaceBridge extends Component {
