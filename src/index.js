@@ -21,12 +21,12 @@ export function createConnect(React, ReactRedux) {
 
   return function connectNamespace(namespace, initial={}) {
     return WrappedComponent =>
-      @ReactRedux.connect(({ namespace: { [namespace]: state } }) => ({
+      ReactRedux.connect(({ namespace: { [namespace]: state } }) => ({
         assign: assign(namespace),
         select(key, __) {
           return arguments.length > 0 ? result(state, key, __) : state || {}
         }
-      }))
+      }))(
       class NamespaceBridge extends Component {
         render () {
           let {assign, dispatch, select, ...props} = this.props;
@@ -65,7 +65,7 @@ export function createConnect(React, ReactRedux) {
           return React.isValidElement(WrappedComponent) ?
             React.cloneElement(WrappedComponent, props) : <WrappedComponent {...props}/>
         }
-      }
+      })
   }
 }
 
