@@ -21,13 +21,14 @@ export function createConnect(React, ReactRedux) {
 
   return function connectNamespace(namespace, initial={}) {
     return WrappedComponent =>
-      ReactRedux.connect(({ namespace: { [namespace]: state } }) => ({
-        assign: assign(namespace),
-        select(key, __) {
-          return arguments.length > 0 ? result(state, key, __) : state || {}
-        }
-      }))(
-      class NamespaceBridge extends Component {
+      ReactRedux.connect(
+        ({ namespace: { [namespace]: state } }) => ({
+          assign: assign(namespace),
+          select(key, __) {
+            return arguments.length > 0 ? result(state, key, __) : state || {}
+          }
+        })
+      )(class NamespaceBridge extends Component {
         render () {
           let {assign, dispatch, select, ...props} = this.props;
 
@@ -71,8 +72,8 @@ export function createConnect(React, ReactRedux) {
 
 export function createShape({PropTypes}) {
   return {
-    namespace: PropTypes.string.isRequired,
     assign: PropTypes.func.isRequired,
+    dispatch: PropTypes.func.isRequired,
     select: PropTypes.func.isRequired
   }
 }
@@ -82,6 +83,7 @@ export function reducer (state={}, action={}) {
     let { payload: { namespace, key, value } } = action
     state[namespace] = {
       ...state[namespace], ...{[key]: value}}
+    state = {...state};
   }
 
   return state;
