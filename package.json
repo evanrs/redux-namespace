@@ -28,6 +28,8 @@
     "react-native": "^0.15.0"
   },
   "dependencies": {
+    "lodash.isfunction": "^3.0.8",
+    "lodash.isstring": "^4.0.1",
     "lodash.result": "^3.1.2",
     "react-redux": "^3.1.0"
   }
