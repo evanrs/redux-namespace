@@ -1,6 +1,8 @@
 import React, { Component, PropTypes } from 'react';
 import * as ReactRedux from 'react-redux';
+import isFunction from 'lodash.isFunction';
 import result from 'lodash.result';
+import isString from 'lodash.isstring';
 
 export const BIND = 'BIND_NAMESPACE';
 
@@ -25,7 +27,7 @@ export function assign(namespace, key, value) {
 }
 
 export function connect(namespace, initial={}) {
-  return WrappedComponent =>
+  return (WrappedComponent) =>
     ReactRedux.connect(
       ({ namespace: { [namespace]: state } }) => ({
         assign: assign(namespace),
@@ -39,18 +41,18 @@ export function connect(namespace, initial={}) {
 
         function dispatcher(target, value) {
           return (
-            // curry or map target
+            // curry or assign many
             arguments.length === 1 ?
-            // curry target
-              typeof target === 'string' ?
+            // curry assign with target
+              isString(target) ?
                 dispatcher.bind(this, target)
             // map target ({key: value}) => assign
-            : ( Object.keys(target).map(key =>
+            : ( Object.keys(target).map((key) =>
                   dispatcher(key, target[key]))
               , target )
           // deferred selector
-          : typeof value === 'function' ?
-            () => dispatcher(target, value())
+          : isFunction(value) ?
+            (...args) => dispatcher(target, value(...args))
           // memoize
           : select(target) !== value ?
               ( dispatch(assign(target, value))
@@ -64,8 +66,21 @@ export function connect(namespace, initial={}) {
           ...select(),
           ...props,
           assign: dispatcher,
+          assigns(key, selector) {
+            return dispatcher(key, (value) =>
+                isString(selector) ? result(value, selector)
+              : isFunction(selector) ? selector(value)
+              : value
+            )
+          },
           dispatch,
-          select
+          select,
+          selects() {
+            return select.bind(null, ...arguments);
+          },
+          touched(key) {
+            return select(['@@touched'].concat(key), false);
+          }
         }
 
         return React.isValidElement(WrappedComponent) ?
@@ -77,9 +92,14 @@ export function connect(namespace, initial={}) {
 export function reducer (state={}, action={}) {
   if (action.type === BIND) {
     let { payload: { namespace, key, value } } = action
-    state[namespace] = {
-      ...state[namespace], ...{[key]: value}}
-    state = {...state};
+
+    let ns = result(state, namespace, {});
+    let touched = result(ns, '@@touched', {});
+
+    ns = {
+      ...ns, [key]: value, ['@@touched']: { ...touched, [key]: true } };
+
+    state = { ...state, [namespace]: ns };
   }
 
   return state;
