@@ -1,6 +1,6 @@
 import React, { Component, PropTypes } from 'react';
 import * as ReactRedux from 'react-redux';
-import isFunction from 'lodash.isFunction';
+import isFunction from 'lodash.isfunction';
 import result from 'lodash.result';
 import isString from 'lodash.isstring';
 
