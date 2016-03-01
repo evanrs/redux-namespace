@@ -84,7 +84,8 @@ export function connect(namespace, initial={}) {
         }
 
         return React.isValidElement(WrappedComponent) ?
-          React.cloneElement(WrappedComponent, props) : <WrappedComponent {...props}/>
+          React.cloneElement(WrappedComponent, props)
+        : React.createElement(WrappedComponent, props)
       }
     })
 }
