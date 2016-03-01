@@ -28,8 +28,7 @@
   },
   "homepage": "https://github.com/evanrs/redux-namespace#readme",
   "peerDependencies": {
-    "react": "^0.14.3",
-    "react-native": "^0.15.0"
+    "react": "^0.14.3"
   },
   "dependencies": {
     "lodash.isfunction": "^3.0.8",
