@@ -4,7 +4,8 @@
   "description": "Namespace your component state in your Redux store",
   "main": "dist/index.js",
   "scripts": {
-    "build": "babel src --out-dir dist",
+    "build": "npm run clean && babel src --out-dir dist",
+    "clean": "rimraf dist",
     "prepublish": "npm run build",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
