@@ -67,9 +67,9 @@ export function connect(namespace, initial={}) {
           ...props,
           assign: dispatcher,
           assigns(key, selector) {
-            return dispatcher(key, (value) =>
+            return dispatcher(key, (value, ...args) =>
                 isString(selector) ? result(value, selector)
-              : isFunction(selector) ? selector(value)
+              : isFunction(selector) ? selector(value, ...args)
               : value
             )
           },
