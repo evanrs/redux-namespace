@@ -7,6 +7,7 @@
     "build": "npm run clean && babel src --out-dir dist",
     "clean": "rimraf dist",
     "prepublish": "npm run build",
+    "postversion": "git push && git push --tags",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
