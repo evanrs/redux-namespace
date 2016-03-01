@@ -1,6 +1,6 @@
 {
   "name": "redux-namespace",
-  "version": "0.3.2-0",
+  "version": "0.3.3-0",
   "description": "Namespace your component state in your Redux store",
   "main": "dist/index.js",
   "scripts": {
