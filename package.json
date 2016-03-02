@@ -28,13 +28,14 @@
   },
   "homepage": "https://github.com/evanrs/redux-namespace#readme",
   "peerDependencies": {
-    "react": "^0.14.3"
+    "react": "^0.14.3",
+    "react-redux": "^4.4.0",
+    "redux": "^3.3.1"
   },
   "dependencies": {
     "lodash.isfunction": "^3.0.8",
     "lodash.isstring": "^4.0.1",
-    "lodash.result": "^3.1.2",
-    "react-redux": "^3.1.0"
+    "lodash.result": "^3.1.2"
   },
   "devDependencies": {
     "babel-cli": "^6.6.0",
