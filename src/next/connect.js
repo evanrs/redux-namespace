@@ -6,11 +6,11 @@ import result from 'lodash/result';
 import { create } from './create'
 
 
-const storeShape = {
+const storeShape = PropTypes.shape({
   subscribe: PropTypes.func.isRequired,
   dispatch: PropTypes.func.isRequired,
   getState: PropTypes.func.isRequired
-};
+});
 
 export function connect(namespace) {
   return function wrapWithComponent (WrappedComponent) {
