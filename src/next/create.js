@@ -3,6 +3,7 @@ import isString from 'lodash/isString';
 import result from 'lodash/result';
 import flow from 'lodash/flow';
 import property from 'lodash/property';
+import mapValues from 'lodash/mapValues';
 
 import { BIND } from './reducer';
 
@@ -23,14 +24,11 @@ export function assign(namespace, key, value) {
 export function create(namespace, store) {
   const { dispatch, getState } = store;
   const getNamespace =
-    flow(getState, property(`namespace.${namespace}`));
+    flow(getState, property(['namespace', namespace]));
 
-  const ns = {
-    assign: assign(namespace),
-    select(key, __) {
-      return arguments.length > 0 ?
-        result(getNamespace(), key, __) : getNamespace() || {}
-    }
+  function selector(key, __) {
+    return arguments.length > 0 ?
+      result(getNamespace(), key, __) : getNamespace() || {}
   }
 
   function dispatcher(target, value) {
@@ -41,15 +39,13 @@ export function create(namespace, store) {
         isString(target) ?
           dispatcher.bind(this, target)
       // map target ({key: value}) => assign
-      : ( Object.keys(target).map((key) =>
-            dispatcher(key, target[key]))
-        , target )
+      : mapValues(target, (value, key) => dispatcher(key, value))
     // deferred selector
     : isFunction(value) ?
       (...args) => dispatcher(target, value(...args))
     // memoize
-    : ns.select(target) !== value ?
-      ( dispatch(ns.assign(target, value))
+    : selector(target) !== value ?
+      ( dispatch(assign(namespace, target, value))
       , value )
     : value
     )
@@ -65,12 +61,12 @@ export function create(namespace, store) {
       )
     },
     dispatch,
-    select: ns.select,
+    select: selector,
     selects() {
-      return select.bind(null, ...arguments);
+      return selector.bind(null, ...arguments);
     },
     touched(key) {
-      return ns.select(['@@touched'].concat(key), false);
+      return selector(['@@touched'].concat(key), false);
     }
   }
 }
