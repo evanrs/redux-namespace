@@ -1,6 +1,6 @@
 {
   "name": "redux-namespace",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "description": "Namespace your component state in your Redux store",
   "main": "dist/index.js",
   "scripts": {
@@ -11,7 +11,10 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "files": [
-    "dist", "lib", "src", "test"
+    "dist",
+    "lib",
+    "src",
+    "test"
   ],
   "repository": {
     "type": "git",
