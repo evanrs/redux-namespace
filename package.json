@@ -2,7 +2,7 @@
   "name": "redux-namespace",
   "version": "0.5.0",
   "description": "Namespace your component state in your Redux store",
-  "main": "dist/index.js",
+  "main": "lib/index.js",
   "scripts": {
     "build": "npm run clean && babel src --out-dir lib",
     "clean": "rimraf dist && rimraf lib",
