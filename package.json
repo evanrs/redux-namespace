@@ -4,12 +4,15 @@
   "description": "Namespace your component state in your Redux store",
   "main": "dist/index.js",
   "scripts": {
-    "build": "npm run clean && babel src --out-dir dist",
-    "clean": "rimraf dist",
+    "build": "npm run clean && babel src --out-dir lib",
+    "clean": "rimraf dist && rimraf lib",
     "prepublish": "npm run build",
     "postversion": "git push && git push --tags",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
+  "files": [
+    "dist", "lib", "src", "test"
+  ],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/evanrs/redux-namespace.git"
