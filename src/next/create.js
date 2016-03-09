@@ -91,6 +91,9 @@ export function create(namespace, store) {
     },
     resets(key) {
       return ns.reset.bind(ns, key);
+    },
+    version() {
+      return selector('@@version', 0)
     }
   }
 
