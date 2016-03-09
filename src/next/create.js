@@ -1,9 +1,15 @@
-import isFunction from 'lodash/isFunction';
-import isString from 'lodash/isString';
-import result from 'lodash/result';
 import flow from 'lodash/flow';
-import property from 'lodash/property';
+import get from 'lodash/get';
+import isFunction from 'lodash/isFunction';
+import isNil from 'lodash/isNil';
+import isObject from 'lodash/isObject';
+import isString from 'lodash/isString';
 import mapValues from 'lodash/mapValues';
+import property from 'lodash/property';
+import result from 'lodash/result';
+import toPath from 'lodash/toPath';
+
+import invariant from 'invariant';
 
 import { BIND } from './reducer';
 
@@ -23,8 +29,12 @@ export function assign(namespace, key, value) {
 
 export function create(namespace, store) {
   const { dispatch, getState } = store;
+
+  const selectNamespace =
+    property(['namespace', ...toPath(namespace)])
+
   const getNamespace =
-    flow(getState, property(['namespace', namespace]));
+    flow(getState, selectNamespace);
 
   function selector(key, __) {
     return arguments.length > 0 ?
@@ -38,6 +48,7 @@ export function create(namespace, store) {
       // curry assign with target
         isString(target) ?
           dispatcher.bind(this, target)
+      // TODO interpret array as property.path
       // map target ({key: value}) => assign
       : mapValues(target, (value, key) => dispatcher(key, value))
     // deferred selector
@@ -51,7 +62,7 @@ export function create(namespace, store) {
     )
   }
 
-  return {
+  const ns = {
     assign: dispatcher,
     assigns(key, selector) {
       return dispatcher(key, (value, ...args) =>
@@ -60,13 +71,31 @@ export function create(namespace, store) {
         : value
       )
     },
+    cursor(path, defaultValue={}) {
+      let nspath = toPath([toPath(namespace), toPath(path)])
+      let cursor = create(nspath, store);
+
+      return cursor;
+    },
     dispatch,
     select: selector,
     selects() {
       return selector.bind(null, ...arguments);
     },
     touched(key) {
-      return selector(['@@touched'].concat(key), false);
+      return selector(['@@touched', ...toPath(key)], false);
+    },
+    reset(key) {
+      dispatcher(key, null);
+      dispatcher(['@@touched', ...toPath(key)], null);
+    },
+    resets(key) {
+      return ns.reset.bind(ns, key);
+    },
+    version() {
+      return selector('@@version', 0)
     }
   }
+
+  return ns;
 }
