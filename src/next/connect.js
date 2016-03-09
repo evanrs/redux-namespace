@@ -1,7 +1,10 @@
 import { Component, PropTypes, createElement } from 'react'
 import hoistStatics from 'hoist-non-react-statics'
 import invariant from 'invariant'
-import result from 'lodash/result';
+import toPath from 'lodash/toPath';
+import isFunction from 'lodash/isFunction';
+import isString from 'lodash/isString';
+import memoize from 'lodash/memoize';
 
 import { create } from './create'
 
@@ -12,11 +15,20 @@ const storeShape = PropTypes.shape({
   getState: PropTypes.func.isRequired
 });
 
-export function connect(namespace) {
+
+const connectNamespace = memoize(create);
+
+
+export function connect(namespace, reducer) {
+  invariant(isString(namespace) || isFunction(namespace),
+    `Expected "namespace" to be of type string or function`
+  );
+
   return function wrapWithComponent (WrappedComponent) {
     class Connect extends Component {
       constructor(props, context) {
-        super(props, context)
+        super(...arguments);
+
         this.store = props.store || context.store
 
         invariant(this.store,
@@ -24,27 +36,44 @@ export function connect(namespace) {
           `props of "${this.constructor.displayName}". `
         )
 
-        this.childProps = create(namespace, this.store)
+        this.namespace = this.getNamespace(props, this.store)
         this.state = {
-          namespace: result(this.store.getState(), `namespace.${namespace}`, {}),
-          version: 0
+          version: this.namespace.version()
         }
       }
 
+      getNamespace(props=this.props, store=this.store) {
+        return (
+          connectNamespace(
+            [ 'namespace',
+              ...toPath(
+                isFunction(namespace) ?
+                  namespace(state, props) : namespace) ],
+            store
+          )
+        )
+      }
+
       componentDidMount() {
-        this.unsubscribe = this.store.subscribe(this.handleChange.bind(this))
+        if (! this.unsubscribe) {
+          this.unsubscribe =
+            this.store.subscribe(this.handleChange.bind(this));
+          this.handleChange();
+        }
       }
 
       componentWillUnmount() {
-        this.unsubscribe()
-        this.unsubscribe = null
+        if (this.unsubscribe) {
+          // comma operator, because why not?
+          this.unsubscribe = this.unsubscribe(), null;
+        }
       }
 
       componentWillUpdate(nextProps, nextState) {
         if (nextState.version !== this.state.version) {
-          this.childProps = {
-            ...this.childProps,
-            version: nextState.version
+          this.namespace = {
+            ...this.getNamespace(nextProps),
+            _version: nextState.version
           }
         }
       }
@@ -54,19 +83,17 @@ export function connect(namespace) {
           return
         }
 
-        const prev = this.state.namespace
-        const next = result(this.store.getState(), `namespace.${namespace}`, prev)
+        const prev = this.state.version
+        const next = this.namespace.version();
+
 
         if (prev !== next) {
-          this.setState({
-            namespace: next,
-            version: this.state.version + 1
-          })
+          this.setState({ version: next })
         }
       }
 
       render() {
-        return createElement(WrappedComponent, { ...this.props, [namespace]: this.childProps })
+        return createElement(WrappedComponent, { ...this.props, [namespace]: this.namespace })
       }
     }
 
