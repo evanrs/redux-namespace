@@ -86,8 +86,22 @@ export function create(namespace, store) {
       return selector(['@@touched', ...toPath(key)], false);
     },
     reset(key) {
-      dispatcher(key, null);
-      dispatcher(['@@touched', ...toPath(key)], null);
+      let value;
+      if (! key) {
+        value = selector();
+
+        Object.keys(value).map((key) => dispatcher(key, null))
+        dispatcher('@@touched', {});
+        dispatcher('@@version', 0);
+      }
+      else {
+        value = selector(key);
+
+        dispatcher(key, null);
+        dispatcher(['@@touched', ...toPath(key)], null);
+      }
+
+      return value;
     },
     resets(key) {
       return ns.reset.bind(ns, key);

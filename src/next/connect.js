@@ -19,7 +19,7 @@ const storeShape = PropTypes.shape({
 const connectNamespace = memoize(create);
 
 
-export function connect(namespace, reducer) {
+export function connect(namespace, key) {
   invariant(isString(namespace) || isFunction(namespace),
     `Expected "namespace" to be of type string or function`
   );
@@ -36,22 +36,10 @@ export function connect(namespace, reducer) {
           `props of "${this.constructor.displayName}". `
         )
 
-        this.namespace = this.getNamespace(props, this.store)
+        this.namespace = this.getNamespace(props)
         this.state = {
           version: this.namespace.version()
         }
-      }
-
-      getNamespace(props=this.props, store=this.store) {
-        return (
-          connectNamespace(
-            [ 'namespace',
-              ...toPath(
-                isFunction(namespace) ?
-                  namespace(state, props) : namespace) ],
-            store
-          )
-        )
       }
 
       componentDidMount() {
@@ -62,11 +50,8 @@ export function connect(namespace, reducer) {
         }
       }
 
-      componentWillUnmount() {
-        if (this.unsubscribe) {
-          // comma operator, because why not?
-          this.unsubscribe = this.unsubscribe(), null;
-        }
+      componentWillReceiveProps(props) {
+        this.namespace = this.getNamespace(props);
       }
 
       componentWillUpdate(nextProps, nextState) {
@@ -76,6 +61,26 @@ export function connect(namespace, reducer) {
             _version: nextState.version
           }
         }
+      }
+
+
+      componentWillUnmount() {
+        if (this.unsubscribe) {
+          // comma operator, because why not?
+          this.unsubscribe = this.unsubscribe(), null;
+        }
+      }
+
+      getNamespace(props = this.props) {
+
+        return (
+          connectNamespace(
+            toPath(
+              isFunction(key) ?
+                [namespace, `/${key(props)}`] : namespace),
+            this.store
+          )
+        )
       }
 
       handleChange() {
