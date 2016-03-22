@@ -54,7 +54,7 @@ import React, {View, Text, TextInput, TouchableHighlight, } from 'react-native'
 import namespace from 'redux-namespace/native';
 
 // If decorators are your thing
-space.connect('component/namespace')
+namespace.connect('component/namespace')
 class Form extends React.Component {
   static propTypes = {...namespace.shape}
 
