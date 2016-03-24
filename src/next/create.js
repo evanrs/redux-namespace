@@ -1,7 +1,5 @@
 import flow from 'lodash/flow';
-import get from 'lodash/get';
 import isFunction from 'lodash/isFunction';
-import isNil from 'lodash/isNil';
 import isObject from 'lodash/isObject';
 import isString from 'lodash/isString';
 import mapValues from 'lodash/mapValues';
@@ -9,11 +7,10 @@ import property from 'lodash/property';
 import result from 'lodash/result';
 import toPath from 'lodash/toPath';
 
-import invariant from 'invariant';
+import { BIND, DEFAULTS, RESET } from './reducer';
 
-import { BIND } from './reducer';
 
-export function assign(namespace, key, value) {
+export function assign (namespace, key, value) {
   if (! key)
     return (key, value) =>
       assign(namespace, key, value);
@@ -27,7 +24,21 @@ export function assign(namespace, key, value) {
   return action(value);
 }
 
-export function create(namespace, store) {
+export function defaults (namespace, key, value) {
+  return {
+    type: DEFAULTS,
+    payload: { namespace, key, value }
+  }
+}
+
+export function reset (namespace, key) {
+  return {
+    type: RESET,
+    payload: { namespace, key }
+  }
+}
+
+export function create (namespace, store) {
   const { dispatch, getState } = store;
 
   const selectNamespace =
@@ -71,13 +82,25 @@ export function create(namespace, store) {
         : value
       )
     },
-    cursor(path, defaultValue={}) {
+    cursor(path) {
       let nspath = toPath([toPath(namespace), toPath(path)])
       let cursor = create(nspath, store);
 
       return cursor;
     },
     dispatch,
+    defaults(key, value) {
+      if (isObject(key)) {
+        dispatch(defaults(namespace, void 0, key));
+
+        return key;
+        // return mapValues(key, (value, key) => ns.defaults(key, value))
+      }
+
+      dispatch(defaults(namespace, key, value));
+
+      return value;
+    },
     select: selector,
     selects() {
       return selector.bind(null, ...arguments);
@@ -87,18 +110,16 @@ export function create(namespace, store) {
     },
     reset(key) {
       let value;
+
       if (! key) {
         value = selector();
 
-        Object.keys(value).map((key) => dispatcher(key, null))
-        dispatcher('@@touched', {});
-        dispatcher('@@version', 0);
+        dispatch(reset(namespace))
       }
       else {
         value = selector(key);
 
-        dispatcher(key, null);
-        dispatcher(['@@touched', ...toPath(key)], null);
+        dispatch(reset(namespace, key))
       }
 
       return value;
