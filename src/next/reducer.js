@@ -1,17 +1,23 @@
 import concat from 'lodash/concat';
 import get from 'lodash/get';
-import merge from 'lodash/merge';
+import mergeWith from 'lodash/mergeWith';
 import set from 'lodash/set';
+import unset from 'lodash/unset';
 import toPath from 'lodash/toPath';
 import clone from 'lodash/clone';
+import includes from 'lodash/includes';
+import isEmpty from 'lodash/isEmpty';
+import isNil from 'lodash/isNil';
 
 
 export const BIND = 'BIND_NAMESPACE_NEXT';
+export const RESET = 'RESET_NAMESPACE_NEXT';
+export const DEFAULTS = 'DEFAULTS_NAMESPACE_NEXT';
 
+const actionTypes = { BIND, RESET, DEFAULTS };
 
 export function namespaceReducer (state={}, action={}) {
-
-  if (action.type === BIND) {
+  if (includes(actionTypes, action.type)) {
     let { payload: { namespace, key, value } } = action
 
     namespace = toPath(namespace);
@@ -21,20 +27,44 @@ export function namespaceReducer (state={}, action={}) {
     let touchedPath = concat(namespace, '@@touched', key);
     let versionPath = concat(namespace, '@@version');
 
-    if (value !== get(state, changedPath)) {
-      let version = get(state, versionPath, 0) + 1;
-      let fragment = set({}, namespace, get(state, namespace));
+    let fragment = set({}, namespace, get(state, namespace));
 
-      clonePath(fragment, changedPath);
-      clonePath(fragment, touchedPath);
+    clonePath(fragment, changedPath);
+    clonePath(fragment, touchedPath);
 
-      set(fragment, versionPath, version);
-      set(fragment, changedPath, value);
-      set(fragment, touchedPath, true);
+    let version = get(state, versionPath, 0);
+    let current = get(state, changedPath);
+    let touched = get(state, touchedPath);
 
-      state = merge(clone(state), fragment)
+    if (action.type === BIND && value !== current) {
+      version = version + 1;
+      current = value;
+      touched = true;
     }
+
+    if (action.type === DEFAULTS && ! touched) {
+      version = version + 1;
+      current = value;
+      touched = false;
+    }
+
+    if (action.type === RESET) {
+      version = 0;
+      current = void 0;
+      touched = false;
+    }
+
+    set(fragment, versionPath, version);
+    set(fragment, touchedPath, touched);
+    set(fragment, changedPath, current);
+
+    state = mergeWith(clone(state), fragment, (a, b, p, c) => {
+      if (isNil(b)) {
+        unset(c, p);
+      }
+    })
   }
+
 
 
   return state;
