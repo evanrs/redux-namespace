@@ -6,6 +6,7 @@ import mapValues from 'lodash/mapValues';
 import property from 'lodash/property';
 import result from 'lodash/result';
 import toPath from 'lodash/toPath';
+import get from 'lodash/get';
 
 import { BIND, DEFAULTS, RESET } from './reducer';
 
@@ -41,18 +42,21 @@ export function reset (namespace, key) {
 export function create (namespace, store) {
   const { dispatch, getState } = store;
 
-  const selectNamespace =
-    property(['namespace', ...toPath(namespace)])
+  const toNSPath = (path) =>
+    [...toPath(namespace), ...toPath(path)]
+
+  const toMetaPath = (meta, path) =>
+    ['namespace', meta, toNSPath(path)]
 
   const getNamespace =
-    flow(getState, selectNamespace);
+    flow(getState, property(['namespace', ...toNSPath()]));
 
-  function selector(key, __) {
+  function selector (key, __) {
     return arguments.length > 0 ?
       result(getNamespace(), key, __) : getNamespace() || {}
   }
 
-  function dispatcher(target, value) {
+  function dispatcher (target, value) {
     return (
       // curry or assign many
       arguments.length === 1 ?
@@ -75,26 +79,26 @@ export function create (namespace, store) {
 
   const ns = {
     assign: dispatcher,
-    assigns(key, selector) {
+    assigns (key, selector) {
       return dispatcher(key, (value, ...args) =>
           isString(selector) ? result(value, selector)
         : isFunction(selector) ? selector(value, ...args)
         : value
       )
     },
-    cursor(path) {
-      let nspath = toPath([toPath(namespace), toPath(path)])
-      let cursor = create(nspath, store);
+    cursor (path) {
+      let cursor = create(toNSPath(path), store);
 
       return cursor;
     },
     dispatch,
-    defaults(key, value) {
+    defaults (key, value) {
       if (isObject(key)) {
-        dispatch(defaults(namespace, void 0, key));
+        // dispatch(defaults(namespace, void 0, key));
+        // return key;
 
-        return key;
-        // return mapValues(key, (value, key) => ns.defaults(key, value))
+        // TODO handle in reducer to avoid multiple dispatch
+        return mapValues(key, (value, key) => ns.defaults(key, value))
       }
 
       dispatch(defaults(namespace, key, value));
@@ -102,13 +106,14 @@ export function create (namespace, store) {
       return value;
     },
     select: selector,
-    selects() {
+    selects () {
       return selector.bind(null, ...arguments);
     },
-    touched(key) {
-      return selector(['@@touched', ...toPath(key)], false);
+    touched (path) {
+      path = toMetaPath('@@toucheds', path);
+      return get(store.getState(), path, 0);
     },
-    reset(key) {
+    reset (key) {
       let value;
 
       if (! key) {
@@ -124,11 +129,12 @@ export function create (namespace, store) {
 
       return value;
     },
-    resets(key) {
+    resets (key) {
       return ns.reset.bind(ns, key);
     },
-    version() {
-      return selector('@@version', 0)
+    version (path) {
+      path = toMetaPath('@@versions', path);
+      return get(store.getState(), path, 0);
     }
   }
 
