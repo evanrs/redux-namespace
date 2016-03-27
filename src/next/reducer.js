@@ -1,22 +1,23 @@
+import clone from 'lodash/clone';
 import concat from 'lodash/concat';
 import get from 'lodash/get';
+import includes from 'lodash/includes';
+import isNil from 'lodash/isNil';
 import mergeWith from 'lodash/mergeWith';
 import set from 'lodash/set';
-import unset from 'lodash/unset';
 import toPath from 'lodash/toPath';
-import clone from 'lodash/clone';
-import includes from 'lodash/includes';
-import isEmpty from 'lodash/isEmpty';
-import isNil from 'lodash/isNil';
+import unset from 'lodash/unset';
 
 
 export const BIND = 'BIND_NAMESPACE_NEXT';
-export const RESET = 'RESET_NAMESPACE_NEXT';
 export const DEFAULTS = 'DEFAULTS_NAMESPACE_NEXT';
+export const RESET = 'RESET_NAMESPACE_NEXT';
 
 const actionTypes = { BIND, RESET, DEFAULTS };
 
+
 export function namespaceReducer (state={}, action={}) {
+
   if (includes(actionTypes, action.type)) {
     let { payload: { namespace, key, value } } = action
 
@@ -24,38 +25,37 @@ export function namespaceReducer (state={}, action={}) {
     key = toPath(key);
 
     let changedPath = concat(namespace, key);
-    let touchedPath = concat(namespace, '@@touched', key);
-    let versionPath = concat(namespace, '@@version');
 
-    let fragment = set({}, namespace, get(state, namespace));
+    let versions = { ...state['@@versions'] };
+    let version = versions[changedPath] || 0;
 
-    clonePath(fragment, changedPath);
-    clonePath(fragment, touchedPath);
+    let toucheds = { ...state['@@toucheds'] };
+    let touched = toucheds[changedPath] || 0;
 
-    let version = get(state, versionPath, 0);
-    let current = get(state, changedPath);
-    let touched = get(state, touchedPath);
+    let fragment = clonePath(
+      set({}, namespace, get(state, namespace)),
+      changedPath
+    );
+    let current = get(fragment, changedPath);
 
     if (action.type === BIND && value !== current) {
-      version = version + 1;
       current = value;
-      touched = true;
+      touched = touched + 1;
+      version = version + 1;
     }
 
     if (action.type === DEFAULTS && ! touched) {
-      version = version + 1;
       current = value;
-      touched = false;
+      touched = 0;
+      version = version + 1;
     }
 
     if (action.type === RESET) {
-      version = 0;
       current = void 0;
-      touched = false;
+      touched = 0;
+      version = 0;
     }
 
-    set(fragment, versionPath, version);
-    set(fragment, touchedPath, touched);
     set(fragment, changedPath, current);
 
     state = mergeWith(clone(state), fragment, (a, b, p, c) => {
@@ -63,11 +63,38 @@ export function namespaceReducer (state={}, action={}) {
         unset(c, p);
       }
     })
+
+    if (touched !== toucheds[changedPath]) {
+      state['@@toucheds'] = setVersionAlongPath(toucheds, changedPath, touched ? 1 : 0);
+    }
+
+    if (version !== versions[changedPath]) {
+      state['@@versions'] = setVersionAlongPath(versions, changedPath);
+    }
   }
 
-
-
   return state;
+}
+
+
+function setVersionAlongPath (versions, path, increment=1) {
+  versions = { ...versions };
+
+  let pathRegex = new RegExp('^' + path + '\..+');
+
+  Object.keys(versions).
+    filter((key) => pathRegex.test(key)).
+    map((key) =>
+      unset(versions, key))
+
+  path.reduce((paths, path) => {
+    paths = paths.concat(path);
+    versions[paths] = (versions[paths] || 0) + increment;
+
+    return paths;
+  }, [])
+
+  return versions;
 }
 
 
