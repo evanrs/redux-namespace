@@ -78,10 +78,12 @@ export function namespaceReducer (state={}, action={}) {
 
     if (touched !== toucheds[changedPath]) {
       state['@@toucheds'] = setVersionAlongPath(toucheds, changedPath, touched ? 1 : 0);
+      state['@@toucheds'][changedPath] = touched;
     }
 
     if (version !== versions[changedPath]) {
       state['@@versions'] = setVersionAlongPath(versions, changedPath);
+      state['@@versions'][changedPath] = version;
     }
   }
 
