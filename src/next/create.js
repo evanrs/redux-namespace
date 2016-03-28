@@ -94,11 +94,11 @@ export function create (namespace, store) {
     dispatch,
     defaults (key, value) {
       if (isObject(key)) {
-        // dispatch(defaults(namespace, void 0, key));
-        // return key;
+        dispatch(defaults(namespace, void 0, key));
+        return key;
 
         // TODO handle in reducer to avoid multiple dispatch
-        return mapValues(key, (value, key) => ns.defaults(key, value))
+        // return mapValues(key, (value, key) => ns.defaults(key, value))
       }
 
       dispatch(defaults(namespace, key, value));
