@@ -111,7 +111,9 @@ describe('create', () => {
 
     ns.assign('foo', {});
     ns.assign('foo.bar', {});
-    ns.reset();
+    ns.reset('foo');
+    expect(ns.version('foo')).toEqual(0);
+
     ns.assign('foo', {});
     expect(ns.version('foo')).toEqual(1);
     expect(ns.touched('foo')).toEqual(1);
