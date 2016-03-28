@@ -3,10 +3,12 @@ import concat from 'lodash/concat';
 import get from 'lodash/get';
 import includes from 'lodash/includes';
 import isNil from 'lodash/isNil';
+import isObject from 'lodash/isObject';
 import mergeWith from 'lodash/mergeWith';
 import set from 'lodash/set';
 import toPath from 'lodash/toPath';
 import unset from 'lodash/unset';
+import mapValues from 'lodash/mapValues';
 
 
 export const BIND = 'BIND_NAMESPACE_NEXT';
@@ -20,6 +22,16 @@ export function namespaceReducer (state={}, action={}) {
 
   if (includes(actionTypes, action.type)) {
     let { payload: { namespace, key, value } } = action
+
+    if (isNil(key) && isObject(value)) {
+      mapValues(value, (value, key) => {
+        state = namespaceReducer(state, {
+          ...action, payload: { namespace, key, value }
+        })
+      })
+
+      return state;
+    }
 
     namespace = toPath(namespace);
     key = toPath(key);
