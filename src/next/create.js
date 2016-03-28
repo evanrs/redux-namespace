@@ -12,7 +12,7 @@ import { BIND, DEFAULTS, RESET } from './reducer';
 
 
 export function assign (namespace, key, value) {
-  if (! key)
+  if (! key && ! isObject(value))
     return (key, value) =>
       assign(namespace, key, value);
 

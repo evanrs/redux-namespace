@@ -132,4 +132,12 @@ describe('create', () => {
     expect(ns.touched('foo.bar')).toEqual(0);
     expect(ns.version('foo.bar')).toEqual(1);
   })
+
+  it('should map over an object', () => {
+    const { ns, store } = createTest();
+
+    ns.assign({ 'bop': 1, 'baz': 2 });
+    expect(ns.version('bop')).toEqual(1)
+    expect(ns.touched('baz')).toEqual(1)
+  })
 })
