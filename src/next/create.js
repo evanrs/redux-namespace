@@ -7,6 +7,7 @@ import property from 'lodash/property';
 import result from 'lodash/result';
 import toPath from 'lodash/toPath';
 import get from 'lodash/get';
+import memoize from 'lodash/memoize';
 
 import { BIND, DEFAULTS, RESET } from './reducer';
 
@@ -86,11 +87,10 @@ export function create (namespace, store) {
         : value
       )
     },
-    cursor (path) {
-      let cursor = create(toNSPath(path), store);
-
-      return cursor;
-    },
+    cursor: memoize(
+      (path) => create(toNSPath(path), store),
+      (path) => toNSPath(path).join()
+    ),
     dispatch,
     defaults (key, value) {
       if (isObject(key)) {
@@ -111,6 +111,7 @@ export function create (namespace, store) {
     },
     touched (path) {
       path = toMetaPath('@@toucheds', path);
+
       return get(store.getState(), path, 0);
     },
     reset (key) {
@@ -135,7 +136,8 @@ export function create (namespace, store) {
     version (path) {
       path = toMetaPath('@@versions', path);
       return get(store.getState(), path, 0);
-    }
+    },
+    toPath: toNSPath
   }
 
   return ns;

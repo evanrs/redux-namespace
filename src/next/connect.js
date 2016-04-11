@@ -5,6 +5,10 @@ import toPath from 'lodash/toPath';
 import isFunction from 'lodash/isFunction';
 import isString from 'lodash/isString';
 import memoize from 'lodash/memoize';
+import constant from 'lodash/constant'
+import result from 'lodash/result'
+import filter from 'lodash/filter'
+import shallowCompare from 'react-addons-shallow-compare'
 
 import { create } from './create'
 
@@ -15,14 +19,21 @@ const storeShape = PropTypes.shape({
   getState: PropTypes.func.isRequired
 });
 
+const nameShape = PropTypes.shape({
+  version: PropTypes.func.isRequired,
+  toPath: PropTypes.func.isRequired
+})
 
-const connectNamespace = memoize(create);
-
+const connectNamespace = memoize(create, (path) => `${path}`);
 
 export function connect(namespace, key) {
   invariant(isString(namespace) || isFunction(namespace),
     `Expected "namespace" to be of type string or function`
   );
+
+  if (! isFunction(namespace)) {
+    namespace = constant(namespace)
+  }
 
   return function wrapWithComponent (WrappedComponent) {
     class Connect extends Component {
@@ -54,15 +65,15 @@ export function connect(namespace, key) {
         this.namespace = this.getNamespace(props);
       }
 
-      componentWillUpdate(nextProps, nextState) {
-        if (nextState.version !== this.state.version) {
-          this.namespace = {
-            ...this.getNamespace(nextProps),
-            _version: nextState.version
-          }
-        }
+      shouldComponentUpdate(nextProps, nextState) {
+        return shallowCompare(this, nextProps, nextState);
       }
 
+      componentWillUpdate(nextProps, nextState) {
+        if (nextState.version !== this.state.version) {
+          this.namespace = this.getNamespace(nextProps)
+        }
+      }
 
       componentWillUnmount() {
         if (this.unsubscribe) {
@@ -72,15 +83,13 @@ export function connect(namespace, key) {
       }
 
       getNamespace(props = this.props) {
+        let segments = filter([
+          ...result(props, 'namespace.toPath', []),
+          namespace(props),
+          isFunction(key) && `/${key(props)}`
+        ])
 
-        return (
-          connectNamespace(
-            toPath(
-              isFunction(key) ?
-                [namespace, `/${key(props)}`] : namespace),
-            this.store
-          )
-        )
+        return connectNamespace(toPath(segments), this.store);
       }
 
       handleChange() {
@@ -98,7 +107,7 @@ export function connect(namespace, key) {
       }
 
       render() {
-        return createElement(WrappedComponent, { ...this.props, [namespace]: this.namespace })
+        return createElement(WrappedComponent, { ...this.props, [namespace(this.props)]: this.namespace })
       }
     }
 
@@ -107,7 +116,8 @@ export function connect(namespace, key) {
       store: storeShape
     }
     Connect.propTypes = {
-      store: storeShape
+      store: storeShape,
+      namespace: nameShape
     }
 
     return hoistStatics(Connect, WrappedComponent)
