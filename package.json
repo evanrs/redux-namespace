@@ -43,7 +43,7 @@
     "hoist-non-react-statics": "^1.0.5",
     "invariant": "^2.2.0",
     "lodash": "^4.6.0",
-    "react-addons-shallow-compare": "^15.0.1"
+    "preact-shallow-compare": "^1.0.1"
   },
   "devDependencies": {
     "babel-cli": "^6.6.0",

@@ -8,7 +8,7 @@ import memoize from 'lodash/memoize';
 import constant from 'lodash/constant'
 import result from 'lodash/result'
 import filter from 'lodash/filter'
-import shallowCompare from 'react-addons-shallow-compare'
+import shallowCompare from 'preact-shallow-compare'
 
 import { create } from './create'
 
