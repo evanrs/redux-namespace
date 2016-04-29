@@ -19,9 +19,12 @@ To get the incredible time traveling super powers and retained transients provid
 from having complete hydration of your app state. Time travel is fun, play with [this](http://todo.cmyk.nyc).
 
 Redux Namespace builds on [React Redux](https://www.npmjs.com/package/react-redux/),
-but provides two new methods: ```select``` and ```assign``` to go with `dispatch`.
-Calling `assign(key, value)` puts a value in your namespace and `select(key)` gets
-it out. Calling `select()` with no parameters returns the entire namespace.
+but provides new methods: `assign`, `cursor` and `select` to go with `dispatch`.
+
+* Calling `assign(key, value)` puts a value in your namespace and `select(key)` gets
+it out.
+* Calling `select()` with no parameters returns the entire namespace.
+* Calling `cursor(key)` returns a nested namespace.
 
 Connecting your components with their own namespace is trivial. Use it like
 React Redux, but forget about writing the selectors.
