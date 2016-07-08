@@ -35,7 +35,7 @@
   },
   "homepage": "https://github.com/evanrs/redux-namespace#readme",
   "peerDependencies": {
-    "react": "^0.14.3",
+    "react": "^15.1.0",
     "react-redux": "^4.4.0",
     "redux": "^3.3.1"
   },
