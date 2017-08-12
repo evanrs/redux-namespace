@@ -1,6 +1,6 @@
 {
   "name": "redux-namespace",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Namespace your component state in your Redux store",
   "main": "./lib/index.js",
   "module": "./es/index.js",
@@ -12,7 +12,7 @@
     "clean": "rimraf dist && rimraf lib",
     "prepublish": "npm test && npm run build",
     "postversion": "npm test && git push && git push --tags",
-    "test": "mocha --compilers js:babel-register --recursive --require ./test/setup.js",
+    "test": "BABEL_MODULES=true mocha --compilers js:babel-register --recursive --require ./test/setup.js",
     "test:watch": "npm test -- --watch"
   },
   "files": [
