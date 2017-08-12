@@ -1,54 +1,41 @@
 Redux Namespace
 =============
 
-Dead simple tool moving component local state to a Redux store namespace.
+Dead simple tool moving component local state into a Redux namespace.
 
 ```shell
 npm install --save redux-namespace
 ```
 
 ## Motivation
-Transient state like toggles and form input require too much boiler plate.
+Got transient state without a home? Do your components lose it when they unmount? Are you swimming in a pool of reducers that do one thing? Then Redux Namespace is for you, because all those problems are tedious and boring, and you have better things to do!
 
-[`redux-namespace`](https://www.npmjs.com/package/redux-namespace)
-helps you connect your component with a trivial key value store. This solves the
-far–too–painful/should–be–easier problems with managing view state after routing.
+[`redux-namespace`](https://www.npmjs.com/package/redux-namespace) it's a key value store, with depth.
 
-### Why store component state outside the component?
-To get the incredible time traveling super powers and retained transients provided
-from having complete hydration of your app state. Time travel is fun, play with [this](http://todo.cmyk.nyc).
-
-Redux Namespace builds on [React Redux](https://www.npmjs.com/package/react-redux/),
-but provides new methods: `assign`, `cursor` and `select` to go with `dispatch`.
-
-* Calling `assign(key, value)` puts a value in your namespace and `select(key)` gets
-it out.
-* Calling `select()` with no parameters returns the entire namespace.
-* Calling `cursor(key)` returns a nested namespace.
-
-Connecting your components with their own namespace is trivial. Use it like
-React Redux, but forget about writing the selectors.
+## Usage
 
 ```js
-namespace.connect('recipe/editor')(Component)
-```
-
-## Setup
-
-```js
-npm install --save redux-namespace
+yarn add redux-namespace
 ```
 
 #### Attach the Reducer
 ```js
 import { createStore, combineReducers } from 'redux';
-import namespace from 'redux-namespace';
+import { reducer } from 'redux-namespace';
 
-const store = createStore(combineReducers({namespace}));
+const store = createStore(combineReducers({namespace: reducer}));
 ```
 
-## Usage
 
+#### Connect your components
+This is probably too easy. Just name your namespace, then `select` and `assign` how you like.
+```js
+connect('pizza')(({ pizza }) =>
+  <input 
+    value={pizza.select('delivery.time') 
+    onChange={pizza.assign('delivery.time', 'target.value')) />)
+```
+Let's look at that again.
 ```js
 import * as namepsace from 'redux-namespace';
 
@@ -70,121 +57,73 @@ const Form = namespace.connect('form', 'signin')((props) => {
 })
 
 ```
+But _you_ know what's up, `assign` is returning a function. A funtion that sets the path you give it to the value it gets. 
 
+But it's not always that easy, sometimes we have to be picky.
+```js
+<input onChange={ns.assigns('email', 'target.value')}/>
+```
+And sometimes we have to be even pickier than that.
+```js
+<CustomInput onChange={ns.assigns('email', (event, value) => value)}/>
+```
+
+How about lists? We can pick a value from props, or pass it a string. So `connect('list', 'item')` will become a prop called `list`, but its values will be assigned to `list.item`.
 ```js
 import { connect, shape } from 'redux-namespace'
 
-@connect('productsList', (props) => props.productId || 'new')
-class Form extends Component {
+@connect('list', (props) => props.id || 'new')
+class ProductForm extends Component {
   static propTypes = {
     productsList: shape
   }
 
   render () {
-    let { ns } = this.props;
+    let { list: ns } = this.props;
     return (
-      <form onSumbit={() => dispatch(someAction(ns.select()))}/>
+      <form onSumbit={() => ns.dispatch(someAction(ns.select()))}/>
         <input
           value={ns.select('product.name')}
           onChange={ns.assigns('product.name', 'target.value')}/>
         <input
           value={select('product.price')}
-          onChange={ns.assigns('produce.price', 'target.value')}/>
+          onChange={this.assigns('product.price', 'target.value')}/>
       </form>
     )
   }
 }
 ```
 
-
-#### Routing
+But you don't have to manage it in one place. You can create a cursor—a pointer to one part of your namespace. It has all the same functions, but applied to its own descendant path.
 ```js
-<Route path='free-pizza'
-  component={ namespace.connect('pizza-surplus')(Component) }/>
-```
 
-##### You get a namespace, and you get a namespace … !
-Automatically wrap your routes by assigning them after they're made.
-```js
-let routes = [
-  <Route/>
-  <Route/>
-  <Route/>
+const productList = [
+  { id: 1, name: '🦄', price: '🌈' },
+  { id: 2, name: '🐿', price: '🥜' },
+  { id: 3, name: '🐮', price: '🌾' },
 ]
 
-routes = routes.map(route => namespace.connect(route.path)(route))
+@connect('productsList')
+const ProductManager = (props) => 
+  <div>
+    {productList.map((product) => {
+        // This will alway return the same cursor
+        const cursor = props.productList.cursor(product.id);
+        
+        // We don't need to set it everytime, but it's safe to
+        cursor.defaults(product);
+        
+        return <ProductForm product={cursor}/>
+      }
+    )}
+  </div>
 ```
 
-#### Lazy binding… sort of
-```js
-@namespace.connect('recipes')
-class RecipeEditor extends React.Component {
-  static propTypes = {...namespace.shape}
+You can also `reset` your namespace, see if it was `touched` and track its `version`. See [the full API here](https://github.com/evanrs/redux-namespace/blob/master/docs/API.md).
 
-  render () {
-    let document = namespace.connect(`recipes/${select('currentId')}`);
-    let autosave = namespace.connect(`recipes/${select('currentId')}/autosave`);
-    let groceries = namespace.connect('groceries');
+It's not the Redux reducer we need, but it's the one I wrote, so have fun with it. ✌️
 
-    let Loader = document(Await)
-    let Autosave = document(autosave(DebouncedSave))
+## Psst.
+Know how to make it the reducer we need? 
 
-    return (
-      <Loader>
-        <Autosave/>
-        { map(React.createElement,
-            map(document, [
-              Menu,
-              WYSIWYG,
-              Editor,
-              WordCount,
-              groceries(VegetableCount),
-              groceries(CalorieCount),
-              groceries(CountChoculaCount)
-            ]))
-          }
-      </Loader>
-    )
-  }
-}
-```
-
-
-### Skip writing actions
-Using the `namespace.BIND` constant you can write new reducers to work with
-your events without adding more plumbing.
-
-```js
-function (state, action) {
-  if (action.type === namespace.BIND) {
-    let {namespace, key, value} = action.payload;
-
-    switch (namespace) {
-      case 'app/signup':
-        state[namespace][key].error = validate(key, value.field);
-        break;
-
-      case 'my/easter/egg':
-        if (key === 'menuToggle')
-          if (++state.finalCountdown > 5)
-            state.surpriseCatGif = true
-        break;
-    }
-
-    // I'm not sure which is more esoteric, the previous example or this one
-    if (state.namespace[namespace][ttl] > new Date() - state[ttl][action.namespace][key])
-      delete state.namespace[namespace][key];
-  }
-
-  return state;
-}
-```
-
-Although you probably shouldn't do this often, it's faster than scaffolding
-the additional constants and action creators. Beware, with great power comes greater side effects…
-that we probably should avoid unless we liked Angular 1—better known as Whoopsie Daisy.
-
-
-## License
-
-MIT
+Get in touch, let's make it work!
