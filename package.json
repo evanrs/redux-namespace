@@ -10,8 +10,8 @@
     "build:es": "babel src --out-dir es",
     "build:lib": "BABEL_MODULES=true babel src --out-dir lib",
     "clean": "rimraf dist && rimraf lib",
-    "prepublish": "BABEL_MODULES=true npm test && npm run build",
-    "postversion": "BABEL_MODULES=true npm test && git push && git push --tags",
+    "prepublish": "npm test && npm run build",
+    "postversion": "npm test && git push && git push --tags",
     "test": "mocha --compilers js:babel-register --recursive --require ./test/setup.js",
     "test:watch": "npm test -- --watch"
   },
