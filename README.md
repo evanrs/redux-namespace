@@ -33,7 +33,7 @@ React Redux, but forget about writing the selectors.
 namespace.connect('recipe/editor')(Component)
 ```
 
-## Installation
+## Setup
 
 ```js
 npm install --save redux-namespace
@@ -47,65 +47,53 @@ import namespace from 'redux-namespace';
 const store = createStore(combineReducers({namespace}));
 ```
 
-
 ## Usage
 
-
-#### Native
 ```js
-import React, {View, Text, TextInput, TouchableHighlight, } from 'react-native'
-import namespace from 'redux-namespace/native';
+import * as namepsace from 'redux-namespace';
 
-// If decorators are your thing
-@namespace.connect('component/namespace')
-class Form extends React.Component {
-  static propTypes = {...namespace.shape}
+const Form = namespace.connect('form', 'signin')((props) => {
+  let { form } = props;
+  return (
+    <View>
+      <TextInput
+        value={form.select('email')} onChange={form.assign('email')}/>
 
-  render () {
-    let {select, assign, dispatch} = this.props;
-    return (
-      <View>
-        <TextInput
-          value={select('email')} onChange={assign('email')}/>
+      <TextInput
+        value={form.select('password')} onChange={form.assign('password')}/>
 
-        <TextInput
-          value={select('password')} onChange={assign('password')}/>
+      <TouchableHighlight onPress={e => dispatch(someAction(form.select()))}>
+        <Text>Submit</Text>
+      </TouchableHighlight>
+    </View>
+  )
+})
 
-        <TouchableHighlight onPress={e => dispatch(someAction(select()))}>
-          <Text>Submit</Text>
-        </TouchableHighlight>
-      </View>
-    )
-  }
-}
 ```
 
-
-#### Web
 ```js
-import React from 'react'
-import namespace from 'redux-namespace';
+import { connect, shape } from 'redux-namespace'
 
-class Form extends React.Component {
-  static propTypes = {...namespace.shape}
+@connect('productsList', (props) => props.productId || 'new')
+class Form extends Component {
+  static propTypes = {
+    productsList: shape
+  }
 
   render () {
-    let {select, assign, dispatch} = this.props;
+    let { ns } = this.props;
     return (
-      <form onSumbit={() => dispatch(someAction(select()))}/>
+      <form onSumbit={() => dispatch(someAction(ns.select()))}/>
         <input
-          value={select('email')}
-          onChange={e => assign('email', e.target.value)}/>
+          value={ns.select('product.name')}
+          onChange={ns.assigns('product.name', 'target.value')}/>
         <input
-          value={select('password')}
-          onChange={e => assign('password', e.target.value)}/>
+          value={select('product.price')}
+          onChange={ns.assigns('produce.price', 'target.value')}/>
       </form>
     )
   }
 }
-
-// Or, if decorators aren't your thing
-export namespace.connect('component/namespace')(Form)
 ```
 
 

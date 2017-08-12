@@ -1,5 +1,7 @@
 # API
-Redux namespace relies heavily on lodash set to set and get values.
+Redux namespace provides tools to read and write to any path in your redux store. Use at your own risk, but enjoy yourself too 🙂
+
+# Namespace
 
 ## `create()`
 Creates a namespace at the given path—a cursor into your redux store for setting and getting values. But really, it's easier to just use the `connect` decorator.
@@ -88,3 +90,5 @@ ns.version(path?: String): Number
 
 ## `dispatch()`
 Standard redux dispatch
+
+---

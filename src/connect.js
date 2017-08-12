@@ -1,4 +1,5 @@
-import { Component, PropTypes, createElement } from 'react'
+import { Component, createElement } from 'react'
+import PropTypes from 'prop-types';
 import hoistStatics from 'hoist-non-react-statics'
 import invariant from 'invariant'
 import toPath from 'lodash/toPath';
@@ -102,12 +103,17 @@ export function connect(namespace, key) {
 
 
         if (prev !== next) {
-          this.setState({ version: next })
+          this.setState(() => ({ version: this.namespace.version() }))
         }
       }
 
       render() {
-        return createElement(WrappedComponent, { ...this.props, [namespace(this.props)]: this.namespace })
+        return createElement(WrappedComponent, {
+          ...this.props,
+          [namespace(this.props)]: this.namespace,
+          // oof, what a hack, but this gives us pure component updates
+          [`__${namespace(this.props)}__version`]: this.state.version
+        })
       }
     }
 
