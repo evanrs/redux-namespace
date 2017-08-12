@@ -33,7 +33,7 @@
     "forms"
   ],
   "author": "Evan Schneider",
-  "license": "ISC",
+  "license": "MIT",
   "bugs": {
     "url": "https://github.com/evanrs/redux-namespace/issues"
   },
