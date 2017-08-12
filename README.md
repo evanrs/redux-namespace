@@ -86,8 +86,8 @@ class ProductForm extends Component {
           value={ns.select('product.name')}
           onChange={ns.assigns('product.name', 'target.value')}/>
         <input
-          value={select('product.price')}
-          onChange={this.assigns('product.price', 'target.value')}/>
+          value={ns.select('product.price')}
+          onChange={ns.assigns('product.price', 'target.value')}/>
       </form>
     )
   }
