@@ -120,3 +120,5 @@ function clonePath (target, path) {
 
   return target;
 }
+
+export default namespaceReducer

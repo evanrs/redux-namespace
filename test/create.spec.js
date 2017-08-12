@@ -1,8 +1,8 @@
 import expect from 'expect';
 import { createStore, combineReducers } from 'redux';
 
-import { create } from '../../src/next/create';
-import { namespaceReducer } from '../../src/next/reducer';
+import { create } from '../src/create';
+import { namespaceReducer } from '../src/reducer';
 
 function createTest () {
   const store = createStore(combineReducers({
@@ -15,23 +15,6 @@ function createTest () {
 }
 
 describe('create', () => {
-  it('should return a namespace', () => {
-    const { ns } = createTest()
-    const methods = Object.keys(ns)
-
-    expect(methods).toContain('assign')
-    expect(methods).toContain('assigns')
-    expect(methods).toContain('cursor')
-    expect(methods).toContain('dispatch')
-    expect(methods).toContain('defaults')
-    expect(methods).toContain('select')
-    expect(methods).toContain('selects')
-    expect(methods).toContain('touched')
-    expect(methods).toContain('reset')
-    expect(methods).toContain('resets')
-    expect(methods).toContain('version')
-  })
-
   it('should assign values', () => {
     const { ns, store } = createTest()
 
