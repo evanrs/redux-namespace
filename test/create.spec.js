@@ -1,8 +1,8 @@
 import expect from 'expect';
 import { createStore, combineReducers } from 'redux';
 
-import { create } from '../../src/next/create';
-import { namespaceReducer } from '../../src/next/reducer';
+import { create } from '../src/create';
+import { namespaceReducer } from '../src/reducer';
 
 function createTest () {
   const store = createStore(combineReducers({
